@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "235878615356",
+    "project_id": "door-to-programming",
+    "storage_bucket": "door-to-programming.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:235878615356:android:7e527d639d226c10ac7639",
+        "android_client_info": {
+          "package_name": "com.example.door_to_programming"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYLpRgmLWxo5yyDKy2bBFiisE3f5N2ZpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:235878615356:android:332252813aba3f7aac7639",
+        "android_client_info": {
+          "package_name": "com.mobile.doortoprogramming"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYLpRgmLWxo5yyDKy2bBFiisE3f5N2ZpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
