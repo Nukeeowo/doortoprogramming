@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'package:door_to_programming/Lessons/lesson_data.dart';
+import 'package:door_to_programming/Services/firestoreService.dart'; // Import Firestore Service
 import 'quiz_page.dart';
-import 'package:door_to_programming/Services/db_helper.dart';
 
 class LanguageLessonScreen extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user; // <--- CHANGED: Now accepts Firebase User
   final Lesson lesson;
   final Color languageColor;
 
@@ -20,32 +21,28 @@ class LanguageLessonScreen extends StatefulWidget {
 }
 
 class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
+  final FirestoreService _firestoreService = FirestoreService(); // Use Firestore
   bool _isCompleted = false;
 
   @override
   void initState() {
     super.initState();
-    _checkCompletionStatus();
-  }
-
-  void _checkCompletionStatus() async {
-    final userId = widget.user['id'] as int;
-    final completed = await DBHelper.isLessonCompleted(userId, widget.lesson.id);
-    if (mounted) {
-      setState(() {
-        _isCompleted = completed;
-      });
-    }
+    // No need to manually check status here if we use StreamBuilder in the UI,
+    // but we can keep a listener if you prefer local state.
+    // For simplicity, we will stick to the Stream in the UI build method.
   }
 
   void _markAsCompleted() async {
-    final userId = widget.user['id'] as int;
-    await DBHelper.markLessonCompleted(userId, widget.lesson.id);
+    // <--- CHANGED: Use Firestore Service
+    await _firestoreService.completeLesson(widget.user.uid, widget.lesson.id.toString());
+    
     if (mounted) {
       setState(() {
         _isCompleted = true;
       });
-      // Optionally notify the parent (HomePage) to refresh progress display
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Хичээл дууслаа! +10 оноо')),
+      );
     }
   }
 
@@ -54,8 +51,8 @@ class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => QuizPage(
-          user: widget.user,
-          lessonId: widget.lesson.id,
+          user: widget.user, // <--- NOTE: Ensure QuizPage also accepts User!
+          lessonId: widget.lesson.id, // Ensure ID is string
           quiz: widget.lesson.quiz,
           lessonTitle: widget.lesson.title,
           languageColor: widget.languageColor,
@@ -63,7 +60,6 @@ class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
       ),
     );
 
-    // Check if the quiz was completed successfully and mark the lesson complete
     if (result == true) {
       _markAsCompleted();
     }
@@ -83,25 +79,35 @@ class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
       body: Stack(
         children: [
           SingleChildScrollView(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100), // Space for bottom button
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Completion Status Badge
-                _buildStatusBadge(),
+                // <--- CHANGED: Badge now listens to Firestore Stream
+                StreamBuilder<bool>(
+                  stream: _firestoreService.isLessonCompleted(widget.user.uid, widget.lesson.id.toString()),
+                  builder: (context, snapshot) {
+                    final isCompleted = snapshot.data ?? false;
+                    // Update local state so the bottom button knows too
+                    if (isCompleted != _isCompleted) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) setState(() => _isCompleted = true);
+                      });
+                    }
+                    return _buildStatusBadge(isCompleted);
+                  },
+                ),
                 const SizedBox(height: 20),
 
-                // Lesson Sections
                 ...widget.lesson.sections.map((section) => _buildSection(context, section)),
                 
                 const SizedBox(height: 40),
 
-                // Quiz Call to Action
                 _buildQuizButton(),
                 
                 const SizedBox(height: 40),
 
-                // Mark as Read Button (for non-quiz lessons, or manual mark)
+                // Only show mark button if NOT completed
                 if (!_isCompleted)
                   SizedBox(
                     width: double.infinity,
@@ -127,26 +133,26 @@ class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
     );
   }
 
-  Widget _buildStatusBadge() {
+  Widget _buildStatusBadge(bool isCompleted) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: _isCompleted ? Colors.green.shade100 : Colors.orange.shade100,
+        color: isCompleted ? Colors.green.shade100 : Colors.orange.shade100,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            _isCompleted ? Icons.check_circle_outline : Icons.pending_actions,
-            color: _isCompleted ? Colors.green : Colors.orange,
+            isCompleted ? Icons.check_circle_outline : Icons.pending_actions,
+            color: isCompleted ? Colors.green : Colors.orange,
             size: 18,
           ),
           const SizedBox(width: 5),
           Text(
-            _isCompleted ? 'Хичээл дууссан' : 'Хичээл дуусаагүй',
+            isCompleted ? 'Хичээл дууссан' : 'Хичээл дуусаагүй',
             style: TextStyle(
-              color: _isCompleted ? Colors.green.shade900 : Colors.orange.shade900,
+              color: isCompleted ? Colors.green.shade900 : Colors.orange.shade900,
               fontWeight: FontWeight.bold,
               fontSize: 14,
             ),
@@ -156,6 +162,7 @@ class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
     );
   }
 
+  // ... (Keep _buildSection and _buildQuizButton exactly as they were in your original code)
   Widget _buildSection(BuildContext context, LessonSection section) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25.0),

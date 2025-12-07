@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'Registry/splash_screen.dart';
-import 'package:firebase_core/firebase_core.dart'; // Import Firebase Core
-
-// NOTE: You must have run 'flutter pub add firebase_core'
+import 'Services/firebase_options.dart'; // <--- IMPORT THIS
 
 void main() async {
-  // Ensure the native bindings are initialized before calling Firebase Core
-  WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize Firebase
-  await Firebase.initializeApp(); 
+  // <--- FIX: Pass the options here
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   runApp(const MyApp());
 }

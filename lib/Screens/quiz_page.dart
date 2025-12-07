@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // 1. Import Firebase Auth
 import 'package:door_to_programming/Lessons/lesson_data.dart';
-import 'package:door_to_programming/Services/db_helper.dart';
+import 'package:door_to_programming/Services/firestoreService.dart'; // 2. Import Firestore Service
 
 class QuizPage extends StatefulWidget {
-  final Map<String, dynamic> user;
+  final User user; // 3. Change Map to Firebase User
   final int lessonId;
   final String lessonTitle;
   final Quiz quiz;
@@ -23,6 +24,9 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  // 4. Instantiate Firestore Service
+  final FirestoreService _firestoreService = FirestoreService();
+  
   int _currentQuestionIndex = 0;
   int? _selectedAnswerIndex;
   int _score = 0;
@@ -60,48 +64,85 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _finishQuiz() async {
-    final userId = widget.user['id'] as int;
-    final totalQuestions = widget.quiz.questions.length;
-    final success = _score > (totalQuestions / 2); // Pass if score is majority
-
-    // 1. Save score to database
-    await DBHelper.saveQuizScore(
-      userId,
-      widget.lessonId,
-      _score,
-      totalQuestions,
+    // 1. Show a loading circle so you know something is happening
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
-    
-    // 2. Display results
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text(
-            success ? 'Баяр хүргэе!' : 'Дахин оролдоорой!',
-            style: TextStyle(color: success ? Colors.green : Colors.red, fontWeight: FontWeight.bold),
-          ),
-          content: Text(
-            'Та ${totalQuestions}-аас ${_score} оноо авлаа.',
-            style: const TextStyle(fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                // Return true to the lesson screen if passed
-                Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context).pop(success); // Pop quiz page
-              },
-              child: Text(
-                'Баталгаажуулах',
-                style: TextStyle(color: widget.languageColor, fontWeight: FontWeight.bold),
+
+    try {
+      final userId = widget.user.uid;
+      final totalQuestions = widget.quiz.questions.length;
+      final success = _score > (totalQuestions / 2); // Pass if score is > 50%
+
+      // 2. Try to save to Firestore
+      if (success) {
+        await _firestoreService.completeLesson(userId, widget.lessonId.toString());
+      }
+
+      // 3. Close the loading circle
+      if (mounted) Navigator.of(context).pop();
+
+      // 4. Show the Result Dialog
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: Text(
+              success ? 'Баяр хүргэе!' : 'Дахин оролдоорой!',
+              style: TextStyle(
+                color: success ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ],
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Та $totalQuestions-аас $_score оноо авлаа.',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                if (success)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                    child: Text(
+                      '+10 XP оноо нэмэгдлээ!',
+                      style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(success); // Return success to previous screen
+                },
+                child: Text(
+                  'Баталгаажуулах',
+                  style: TextStyle(color: widget.languageColor, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // If there is an error, close loading and show the error message
+      if (mounted) Navigator.of(context).pop();
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Алдаа гарлаа: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
         ),
       );
+      print("Quiz Error: $e"); // Check your debug console for this!
     }
   }
 
@@ -241,7 +282,7 @@ class _QuizPageState extends State<QuizPage> {
 
     return GestureDetector(
       onTap: _isAnswerChecked
-          ? null // Disable tap after checking
+          ? null 
           : () {
               setState(() {
                 _selectedAnswerIndex = index;

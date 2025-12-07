@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Services/firebaseAuthService.dart';
+import '../Services/auth_service.dart';
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -25,7 +25,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     // Call the new Firebase Service
-    final user = await FirebaseAuthService().registerUser(
+    final user = await AuthService().registerUser(
       _emailController.text,
       _passwordController.text,
     );
