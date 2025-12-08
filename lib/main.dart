@@ -6,14 +6,16 @@ import 'Services/firebase_options.dart'; // <--- IMPORT THIS
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // <--- FIX: Pass the options here
+  // FIX: Pass the correct options using DefaultFirebaseOptions.currentPlatform
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  runApp(const MyApp());
+  // Assuming MyApp is your main widget that starts the application
+  runApp(const MyApp()); 
 }
 
+// If your MyApp class was missing after the incomplete main() function, add this basic structure:
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -22,8 +24,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Door to Programming',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const SplashScreen(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const SplashScreen(), // Starts with your splash screen
     );
   }
 }

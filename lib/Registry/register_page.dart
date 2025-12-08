@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../Services/firebaseAuthService.dart'; // <--- FIX: Import the correct file
+import 'package:firebase_auth/firebase_auth.dart';
+import '../Services/firebaseAuthService.dart';
+import '../Services/firestoreService.dart'; // <--- IMPORT THIS
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -24,18 +26,16 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // <--- FIX: Use FirebaseAuthService() instead of AuthService()
-    final user = await FirebaseAuthService().registerUser(
+    // 1. Register in Firebase Auth
+    final User? user = await FirebaseAuthService().registerUser(
       _emailController.text,
       _passwordController.text,
     );
     
-    if (user == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration failed. Check console for error details.')));
-      }
-    } else {
+    if (user != null) {
+      // 2. FIX: Create the User Profile in Firestore
+      await FirestoreService().saveNewUserProfile(user.uid, user.email ?? '');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registration successful! Please log in.')));
@@ -43,6 +43,11 @@ class _RegisterPageState extends State<RegisterPage> {
           context,
           MaterialPageRoute(builder: (_) => const LoginPage()),
         );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration failed. Check console for error details.')));
       }
     }
   }

@@ -27,6 +27,7 @@ class FirestoreService {
   }
 
   // 3. Mark Lesson as Completed & Award Points
+  // 3. Mark Lesson as Completed & Award Points
   Future<void> completeLesson(String userId, String lessonId) async {
     final docId = '${userId}_$lessonId';
     final progressRef = _db.collection(_progressCollection).doc(docId);
@@ -45,10 +46,10 @@ class FirestoreService {
           'last_accessed': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
 
-        // Award 10 points
-        transaction.update(userRef, {
+        // Award 10 points (Use set with merge instead of update to prevent crash)
+        transaction.set(userRef, {
           'points': FieldValue.increment(10)
-        });
+        }, SetOptions(merge: true)); 
       }
     });
   }
