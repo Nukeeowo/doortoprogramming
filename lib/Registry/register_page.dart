@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Services/auth_service.dart';
+import '../Services/firebaseAuthService.dart'; // <--- FIX: Import the correct file
 import 'login_page.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -24,25 +24,26 @@ class _RegisterPageState extends State<RegisterPage> {
       return;
     }
 
-    // Call the new Firebase Service
-    final user = await AuthService().registerUser(
+    // <--- FIX: Use FirebaseAuthService() instead of AuthService()
+    final user = await FirebaseAuthService().registerUser(
       _emailController.text,
       _passwordController.text,
     );
     
-    // Check if the user object was returned (registration was successful)
     if (user == null) {
-      // Registration failed (e.g., email already in use, weak password)
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Registration failed. Check email format or password strength.')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration failed. Check console for error details.')));
+      }
     } else {
-      // Registration successful, navigate to Login
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Registration successful! Please log in.')));
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration successful! Please log in.')));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+        );
+      }
     }
   }
 
@@ -53,7 +54,6 @@ class _RegisterPageState extends State<RegisterPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        // Default back button pops to the previous screen (SplashScreen)
         leading: const BackButton(color: blue),
         title: const Text(
           "Бүртгүүлэх",
@@ -71,8 +71,6 @@ class _RegisterPageState extends State<RegisterPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 50),
-
-              // 1. Identifier Field (Нэвтрэх нэр)
               TextField(
                 controller: _emailController,
                 style: const TextStyle(color: blue),
@@ -81,16 +79,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   hintStyle: TextStyle(color: blue.withOpacity(0.6)),
                   filled: true,
                   fillColor: lightBlue,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 ),
               ),
               const SizedBox(height: 20),
-
-              // 2. Password Field (Нууц үг)
               TextField(
                 controller: _passwordController,
                 obscureText: true,
@@ -100,16 +93,11 @@ class _RegisterPageState extends State<RegisterPage> {
                   hintStyle: TextStyle(color: blue.withOpacity(0.6)),
                   filled: true,
                   fillColor: lightBlue,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Register Button (Бүртгүүлэх)
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -117,30 +105,16 @@ class _RegisterPageState extends State<RegisterPage> {
                   onPressed: _register,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Бүртгүүлэх',
-                    style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
+                  child: const Text('Бүртгүүлэх', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 20),
-              
-              // Login Link
               TextButton(
-                // Changed from pushReplacement to standard push to allow back navigation
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                ),
-                child: const Text(
-                  'Бүртгэлтэй юу? Нэвтрэх',
-                  style: TextStyle(color: blue),
-                ),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginPage())),
+                child: const Text('Бүртгэлтэй юу? Нэвтрэх', style: TextStyle(color: blue)),
               ),
             ],
           ),

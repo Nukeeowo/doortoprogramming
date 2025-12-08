@@ -1,7 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class DBHelper {
   static Database? _db;
@@ -184,61 +183,5 @@ class DBHelper {
     );
     
     return result.isNotEmpty ? result.first : null;
-  }
-}
-class FirebaseAuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  // 1. Get the current user stream for automatic sign-in checking
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
-
-  // 2. Replaces DBHelper.registerUser
-  Future<User?> registerUser(String email, String password) async {
-    try {
-      final userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return userCredential.user;
-    } on FirebaseAuthException {
-      // Handle Firebase errors (e.g., 'email-already-in-use', 'weak-password')
-      // The calling UI function will handle the error message based on return null.
-      return null;
-    } catch (e) {
-      // General error
-      return null;
-    }
-  }
-
-  // 3. Replaces DBHelper.loginUser
-  Future<User?> loginUser(String email, String password) async {
-    try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return userCredential.user;
-    } on FirebaseAuthException {
-      // Handle Firebase errors (e.g., 'user-not-found', 'wrong-password')
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // 4. Replaces DBHelper.resetPassword
-  Future<bool> sendPasswordResetEmail(String email) async {
-    try {
-      await _auth.sendPasswordResetEmail(email: email);
-      return true; // Success: Email sent
-    } on FirebaseAuthException {
-      // Handle Firebase errors (e.g., 'user-not-found')
-      return false; // Failure
-    }
-  }
-
-  // 5. New function to handle sign out
-  Future<void> signOut() async {
-    await _auth.signOut();
   }
 }
