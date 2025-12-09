@@ -5,14 +5,14 @@ class UserModel {
   final String email;
   final String? displayName;
   final int points; // <--- NEW: Added this field
-  final List<String> favoritedLessonIds;
+  final List<String> favorites;
 
   UserModel({
     required this.uid,
     required this.email,
     this.displayName,
     this.points = 0, // <--- NEW: Default to 0
-    this.favoritedLessonIds = const [],
+    this.favorites = const [],
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -22,7 +22,7 @@ class UserModel {
       email: data?['email'] ?? '',
       displayName: data?['displayName'],
       points: data?['points'] ?? 0, // <--- NEW: Read from Firestore
-      favoritedLessonIds: List<String>.from(data?['favorited_lessons'] ?? []),
+      favorites: List<String>.from(data?['favorited_lessons'] ?? []),
     );
   }
 
@@ -30,8 +30,8 @@ class UserModel {
     return {
       'email': email,
       'displayName': displayName,
-      'points': points, // <--- NEW: Write to Firestore
-      'favorited_lessons': favoritedLessonIds,
+      'points': points, 
+      'favorited_lessons': favorites,
       'created_at': FieldValue.serverTimestamp(),
     };
   }

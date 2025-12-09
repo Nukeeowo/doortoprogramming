@@ -380,49 +380,57 @@ final List<ProgrammingLanguage> allLanguagesWithLessons = [
   ProgrammingLanguage(
     title: 'Java',
     imagePath: 'assets/java.png',
-    color: const Color(0xFFE53935), // Red
+    // Orange/Red (Java Brand Color)
+    color: const Color(0xFFE65100), 
     lessons: javaLessons,
   ),
   ProgrammingLanguage(
     title: 'Python',
     imagePath: 'assets/python.png',
-    color: const Color(0xFF42A5F5), // Blue
+    // Python Blue
+    color: const Color(0xFF1E88E5), 
     lessons: pythonLessons,
   ),
   ProgrammingLanguage(
     title: 'C++',
     imagePath: 'assets/cpp.png',
-    color: const Color(0xFF7E57C2), // Purple
+    // Deep Blue
+    color: const Color(0xFF1565C0), 
     lessons: cppLessons,
   ),
   ProgrammingLanguage(
     title: 'JavaScript',
     imagePath: 'assets/javascript.png',
-    color: const Color(0xFFFFCA28), // Yellow
+    // Amber/Gold (Readable "Yellow")
+    color: const Color(0xFFFFB300), 
     lessons: jsLessons,
   ),
   ProgrammingLanguage(
     title: 'PHP',
     imagePath: 'assets/php.png',
-    color: const Color(0xFF5C6BC0), // Indigo
+    // Indigo/Purple
+    color: const Color(0xFF5C6BC0), 
     lessons: phpLessons,
   ),
   ProgrammingLanguage(
     title: 'SQL',
     imagePath: 'assets/sql.png',
-    color: const Color(0xFF607D8B), // Blue Grey
+    // Blue Grey (Database feel)
+    color: const Color(0xFF546E7A), 
     lessons: sqlLessons,
   ),
   ProgrammingLanguage(
     title: 'Ruby',
     imagePath: 'assets/ruby.png',
-    color: const Color(0xFFD32F2F), // Dark Red
+    // Ruby Red
+    color: const Color(0xFFD32F2F), 
     lessons: rubyLessons,
   ),
   ProgrammingLanguage(
     title: 'Go',
     imagePath: 'assets/go.png',
-    color: const Color(0xFF00ACC1), // Cyan
+    // Go Cyan
+    color: const Color(0xFF00ACC1), 
     lessons: goLessons,
   ),
 ];

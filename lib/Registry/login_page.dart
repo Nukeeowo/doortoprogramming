@@ -50,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: const BackButton(color: blue),
         title: const Text("Тавтай Морил!", style: TextStyle(color: blue, fontWeight: FontWeight.bold)),
         centerTitle: false,
       ),
@@ -66,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _emailController,
                 style: const TextStyle(color: blue),
                 decoration: InputDecoration(
-                  hintText: 'Нэвтрэх нэр',
+                  hintText: 'И-мэйл хаяг',
                   hintStyle: TextStyle(color: blue.withOpacity(0.6)),
                   filled: true,
                   fillColor: lightBlue,

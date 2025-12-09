@@ -1,203 +1,259 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:door_to_programming/Lessons/lesson_data.dart';
-import 'package:door_to_programming/Services/firestoreService.dart'; // Import Firestore Service
+import 'package:door_to_programming/Services/firestoreService.dart';
+import 'package:door_to_programming/Models/app_models.dart'; // Import UserModel
 import 'quiz_page.dart';
 
-class LanguageLessonScreen extends StatefulWidget {
-  final User user; // <--- CHANGED: Now accepts Firebase User
+class LanguageLessonScreen extends StatelessWidget {
+  final User user;
   final Lesson lesson;
   final Color languageColor;
+  final String languageTitle; // <--- NEW: Need this to favorite the course
 
-  const LanguageLessonScreen({
+  LanguageLessonScreen({
     super.key,
     required this.user,
     required this.lesson,
     required this.languageColor,
+    required this.languageTitle, // <--- Add to constructor
   });
 
-  @override
-  State<LanguageLessonScreen> createState() => _LanguageLessonScreenState();
-}
-
-class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
-  final FirestoreService _firestoreService = FirestoreService(); // Use Firestore
-  bool _isCompleted = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // No need to manually check status here if we use StreamBuilder in the UI,
-    // but we can keep a listener if you prefer local state.
-    // For simplicity, we will stick to the Stream in the UI build method.
-  }
-
-  void _markAsCompleted() async {
-    // <--- CHANGED: Use Firestore Service
-    await _firestoreService.completeLesson(widget.user.uid, widget.lesson.id.toString());
-    
-    if (mounted) {
-      setState(() {
-        _isCompleted = true;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Хичээл дууслаа! +10 оноо')),
-      );
-    }
-  }
-
-  void _navigateToQuiz() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => QuizPage(
-          user: widget.user, // <--- NOTE: Ensure QuizPage also accepts User!
-          lessonId: widget.lesson.id, // Ensure ID is string
-          quiz: widget.lesson.quiz,
-          lessonTitle: widget.lesson.title,
-          languageColor: widget.languageColor,
-        ),
-      ),
-    );
-
-    if (result == true) {
-      _markAsCompleted();
-    }
-  }
+  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      
+      // --- AppBar ---
       appBar: AppBar(
+        backgroundColor: languageColor,
+        elevation: 0,
+        leading: const BackButton(color: Colors.white),
         title: Text(
-          widget.lesson.title,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          lesson.title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: widget.languageColor,
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // <--- CHANGED: Badge now listens to Firestore Stream
-                StreamBuilder<bool>(
-                  stream: _firestoreService.isLessonCompleted(widget.user.uid, widget.lesson.id.toString()),
-                  builder: (context, snapshot) {
-                    final isCompleted = snapshot.data ?? false;
-                    // Update local state so the bottom button knows too
-                    if (isCompleted != _isCompleted) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) setState(() => _isCompleted = true);
-                      });
-                    }
-                    return _buildStatusBadge(isCompleted);
-                  },
+        centerTitle: true,
+        // --- NEW: Favorite Button in Top Right ---
+        actions: [
+          StreamBuilder<UserModel>(
+            stream: _firestoreService.streamUserProfile(user.uid),
+            builder: (context, snapshot) {
+              // Default to not favorited while loading
+              final favorites = snapshot.data?.favorites ?? [];
+              final isFavorited = favorites.contains(languageTitle);
+
+              return IconButton(
+                icon: Icon(
+                  isFavorited ? Icons.favorite : Icons.favorite_border,
+                  color: Colors.white, // White to match AppBar theme
                 ),
-                const SizedBox(height: 20),
+                onPressed: () {
+                  _firestoreService.toggleFavorite(user.uid, languageTitle);
+                  
+                  // Optional: Show a small snackbar feedback
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(isFavorited 
+                          ? '$languageTitle removed from favorites' 
+                          : '$languageTitle added to favorites'),
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      
+      // --- Body ---
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Completion Status Badge
+                  StreamBuilder<bool>(
+                    stream: _firestoreService.isLessonCompleted(user.uid, lesson.id.toString()),
+                    builder: (context, snapshot) {
+                      final isCompleted = snapshot.data ?? false;
+                      if (!isCompleted) return const SizedBox.shrink();
 
-                ...widget.lesson.sections.map((section) => _buildSection(context, section)),
-                
-                const SizedBox(height: 40),
-
-                _buildQuizButton(),
-                
-                const SizedBox(height: 40),
-
-                // Only show mark button if NOT completed
-                if (!_isCompleted)
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: _markAsCompleted,
-                      icon: const Icon(Icons.done_all, color: Colors.green),
-                      label: const Text('Уншиж дууссан гэж тэмдэглэх'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.green,
-                        side: const BorderSide(color: Colors.green),
-                        padding: const EdgeInsets.all(15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.green.shade200),
                         ),
-                      ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle, color: Colors.green),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                "You have completed this lesson!",
+                                style: TextStyle(
+                                  color: Colors.green.shade800,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
+                  // 2. Lesson Sections
+                  ...lesson.sections.map((section) => _buildSection(section)),
+                   
+                  const SizedBox(height: 80), 
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      // --- Fixed Bottom "Start Quiz" Button ---
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuizPage(
+                      user: user,
+                      lessonId: lesson.id,
+                      lessonTitle: lesson.title,
+                      quiz: lesson.quiz,
+                      languageColor: languageColor,
                     ),
                   ),
-              ],
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: languageColor,
+                elevation: 5,
+                shadowColor: languageColor.withOpacity(0.4),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.quiz, color: Colors.white, size: 24),
+                  SizedBox(width: 10),
+                  Text(
+                    'Start Quiz',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatusBadge(bool isCompleted) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: isCompleted ? Colors.green.shade100 : Colors.orange.shade100,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isCompleted ? Icons.check_circle_outline : Icons.pending_actions,
-            color: isCompleted ? Colors.green : Colors.orange,
-            size: 18,
-          ),
-          const SizedBox(width: 5),
-          Text(
-            isCompleted ? 'Хичээл дууссан' : 'Хичээл дуусаагүй',
-            style: TextStyle(
-              color: isCompleted ? Colors.green.shade900 : Colors.orange.shade900,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ... (Keep _buildSection and _buildQuizButton exactly as they were in your original code)
-  Widget _buildSection(BuildContext context, LessonSection section) {
+  Widget _buildSection(LessonSection section) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 25.0),
+      padding: const EdgeInsets.only(bottom: 30.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            section.heading,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: widget.languageColor.withOpacity(0.9),
+          if (section.heading.isNotEmpty) ...[
+            Text(
+              section.heading,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: Colors.black87,
+                letterSpacing: -0.5,
+              ),
             ),
-          ),
-          const Divider(height: 15),
+            const SizedBox(height: 12),
+          ],
           Text(
             section.content,
-            style: const TextStyle(fontSize: 16, height: 1.5, color: Colors.black87),
+            style: TextStyle(
+              fontSize: 16,
+              height: 1.6, 
+              color: Colors.grey[800],
+            ),
           ),
-          if (section.codeSnippet != null) ...[
-            const SizedBox(height: 15),
+          if (section.codeSnippet != null && section.codeSnippet!.isNotEmpty) ...[
+            const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(15),
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey.shade300),
+                color: const Color(0xFF1E1E1E), 
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                boxShadow: [
+                   BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                   )
+                ]
               ),
-              child: SelectableText(
-                section.codeSnippet!,
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 14,
-                  color: Colors.black,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _windowDot(const Color(0xFFFF5F56)),
+                      const SizedBox(width: 6),
+                      _windowDot(const Color(0xFFFFBD2E)),
+                      const SizedBox(width: 6),
+                      _windowDot(const Color(0xFF27C93F)),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  SelectableText(
+                    section.codeSnippet!,
+                    style: const TextStyle(
+                      fontFamily: 'Courier New',
+                      color: Color(0xFFD4D4D4),
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -206,56 +262,13 @@ class _LanguageLessonScreenState extends State<LanguageLessonScreen> {
     );
   }
 
-  Widget _buildQuizButton() {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          gradient: LinearGradient(
-            colors: [widget.languageColor.withOpacity(0.9), widget.languageColor.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: InkWell(
-          onTap: _navigateToQuiz,
-          borderRadius: BorderRadius.circular(15),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                const Icon(Icons.quiz, color: Colors.white, size: 30),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Дадлагын шалгалт: ${widget.lesson.quiz.title}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      const Text(
-                        'Өөрийн мэдлэгийг шалгаж, хичээлээ дуусгаарай.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
-              ],
-            ),
-          ),
-        ),
+  Widget _windowDot(Color color) {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
