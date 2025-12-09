@@ -4,6 +4,7 @@ import 'package:door_to_programming/Lessons/lesson_data.dart';
 import 'package:door_to_programming/Services/firestoreService.dart';
 import 'package:door_to_programming/Models/app_models.dart'; // Import UserModel
 import 'quiz_page.dart';
+import 'code_playground.dart';
 
 class LanguageLessonScreen extends StatelessWidget {
   final User user;
@@ -41,7 +42,27 @@ class LanguageLessonScreen extends StatelessWidget {
         centerTitle: true,
         // --- NEW: Favorite Button in Top Right ---
         actions: [
+          IconButton(
+              icon: const Icon(Icons.code, color: Colors.white),
+              tooltip: 'Open Compiler',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CodePlaygroundPage(
+                      language: languageTitle,
+                      // Try to find a code snippet from the lesson to pre-fill
+                      initialCode: lesson.sections
+                          .firstWhere((s) => s.codeSnippet != null, 
+                              orElse: () => const LessonSection(heading: '', content: '', codeSnippet: ''))
+                          .codeSnippet ?? '',
+                    ),
+                  ),
+                );
+              },
+            ),
           StreamBuilder<UserModel>(
+            
             stream: _firestoreService.streamUserProfile(user.uid),
             builder: (context, snapshot) {
               // Default to not favorited while loading

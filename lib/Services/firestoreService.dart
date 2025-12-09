@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Models/app_models.dart';
+import 'package:flutter/material.dart';
+import 'package:door_to_programming/Lessons/lesson_data.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  
 
   // Collections
   final String _usersCollection = 'users';
   final String _progressCollection = 'user_progress';
+  final String _languagesCollection = 'languages';
 
   // 1. Create User Profile
   Future<void> saveNewUserProfile(String uid, String email) async {
@@ -91,4 +95,39 @@ class FirestoreService {
       'photoUrl': url,
     });
   }
+Stream<List<ProgrammingLanguage>> streamLanguages() {
+    return _db.collection(_languagesCollection).orderBy('id').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        
+        // Manual parsing because ProgrammingLanguage structure is nested
+        return ProgrammingLanguage(
+          title: data['title'],
+          imagePath: data['imagePath'],
+          // Convert hex string to Color object
+          color: Color(int.parse(data['colorHex'])), 
+          lessons: (data['lessons'] as List<dynamic>).map((l) {
+            return Lesson(
+              id: l['id'],
+              title: l['title'],
+              sections: (l['sections'] as List<dynamic>).map((s) => LessonSection(
+                heading: s['heading'],
+                content: s['content'],
+                codeSnippet: s['codeSnippet'],
+              )).toList(),
+              quiz: Quiz(
+                title: l['quiz']['title'],
+                questions: (l['quiz']['questions'] as List<dynamic>).map((q) => QuizQuestion(
+                  questionText: q['questionText'],
+                  options: List<String>.from(q['options']),
+                  correctAnswerIndex: q['correctAnswerIndex'],
+                )).toList(),
+              ),
+            );
+          }).toList(),
+        );
+      }).toList();
+    });
+  }
 }
+
