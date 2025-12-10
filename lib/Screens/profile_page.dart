@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:door_to_programming/Services/firestoreService.dart';
 import 'package:door_to_programming/Lessons/lesson_data.dart';
-import 'package:door_to_programming/Registry/login_page.dart'; // <--- IMPORT LOGIN PAGE
+import 'package:door_to_programming/Registry/login_page.dart';
 import 'change_password_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -16,13 +16,12 @@ class _ProfilePageState extends State<ProfilePage> {
   final FirestoreService _firestoreService = FirestoreService();
   bool _isProgressExpanded = false;
 
-  // --- NEW: Logout Logic ---
   void _logout() async {
     await FirebaseAuth.instance.signOut();
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginPage()),
-        (route) => false, // Remove all previous routes so user can't go back
+        (route) => false,
       );
     }
   }
@@ -44,7 +43,6 @@ class _ProfilePageState extends State<ProfilePage> {
         padding: const EdgeInsets.only(bottom: 100),
         child: Column(
           children: [
-            // --- Header Section ---
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
@@ -55,10 +53,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))
                 ],
               ),
-              // Use Stack to position the logout button
               child: Stack(
                 children: [
-                  // 1. Centered User Info
                   Align(
                     alignment: Alignment.center,
                     child: Column(
@@ -90,7 +86,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
 
-                  // 2. Logout Button (Top Right)
                   Positioned(
                     right: 0,
                     top: 0,
@@ -106,7 +101,6 @@ class _ProfilePageState extends State<ProfilePage> {
             
             const SizedBox(height: 20),
 
-            // --- Interactive Progress Bar ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: _buildInteractiveProgressCard(currentUser.uid),
@@ -114,7 +108,6 @@ class _ProfilePageState extends State<ProfilePage> {
             
             const SizedBox(height: 30),
 
-            // --- Settings Section ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
@@ -170,7 +163,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // --- Helper Widgets ---
   Widget _buildInteractiveProgressCard(String uid) {
     final totalLessons = allLanguagesWithLessons.fold<int>(0, (sum, lang) => sum + lang.lessons.length);
     

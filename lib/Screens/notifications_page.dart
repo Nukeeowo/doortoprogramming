@@ -8,14 +8,13 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  // Mock Data: In a real app, this would come from Firestore
   List<Map<String, dynamic>> notifications = [
     {
       'id': 1,
       'title': 'Амжилттай!',
       'body': 'Та Python хичээлийн 1-р бүлгийг амжилттай дуусгалаа. +10 XP',
       'time': '2 цагийн өмнө',
-      'type': 'success', // success, info, alert
+      'type': 'success', 
       'isRead': false,
     },
     {
@@ -68,7 +67,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        automaticallyImplyLeading: false, // Hide back button as it's a tab
+        automaticallyImplyLeading: false,
         actions: [
           if (notifications.isNotEmpty)
             TextButton(

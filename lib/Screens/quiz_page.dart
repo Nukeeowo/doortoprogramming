@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // 1. Import Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'package:door_to_programming/Lessons/lesson_data.dart';
-import 'package:door_to_programming/Services/firestoreService.dart'; // 2. Import Firestore Service
+import 'package:door_to_programming/Services/firestoreService.dart'; 
 
 class QuizPage extends StatefulWidget {
-  final User user; // 3. Change Map to Firebase User
+  final User user;
   final int lessonId;
   final String lessonTitle;
   final Quiz quiz;
@@ -24,7 +24,6 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
-  // 4. Instantiate Firestore Service
   final FirestoreService _firestoreService = FirestoreService();
   
   int _currentQuestionIndex = 0;
@@ -64,7 +63,6 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void _finishQuiz() async {
-    // 1. Show a loading circle so you know something is happening
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -74,17 +72,14 @@ class _QuizPageState extends State<QuizPage> {
     try {
       final userId = widget.user.uid;
       final totalQuestions = widget.quiz.questions.length;
-      final success = _score > (totalQuestions / 2); // Pass if score is > 50%
+      final success = _score > (totalQuestions / 2);
 
-      // 2. Try to save to Firestore
       if (success) {
         await _firestoreService.completeLesson(userId, widget.lessonId.toString());
       }
 
-      // 3. Close the loading circle
       if (mounted) Navigator.of(context).pop();
 
-      // 4. Show the Result Dialog
       if (mounted) {
         showDialog(
           context: context,
@@ -119,8 +114,8 @@ class _QuizPageState extends State<QuizPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.of(context).pop(success); // Return success to previous screen
+                  Navigator.of(context).pop(); 
+                  Navigator.of(context).pop(success); 
                 },
                 child: Text(
                   'Баталгаажуулах',
@@ -132,7 +127,6 @@ class _QuizPageState extends State<QuizPage> {
         );
       }
     } catch (e) {
-      // If there is an error, close loading and show the error message
       if (mounted) Navigator.of(context).pop();
       
       ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +136,7 @@ class _QuizPageState extends State<QuizPage> {
           duration: const Duration(seconds: 5),
         ),
       );
-      print("Quiz Error: $e"); // Check your debug console for this!
+      print("Quiz Error: $e"); 
     }
   }
 
@@ -163,7 +157,6 @@ class _QuizPageState extends State<QuizPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Progress Indicator
             LinearProgressIndicator(
               value: (_currentQuestionIndex + 1) / widget.quiz.questions.length,
               backgroundColor: Colors.grey.shade300,
@@ -171,14 +164,12 @@ class _QuizPageState extends State<QuizPage> {
             ),
             const SizedBox(height: 10),
             
-            // Question Counter
             Text(
               'Асуулт ${_currentQuestionIndex + 1} / ${widget.quiz.questions.length}',
               style: const TextStyle(fontSize: 16, color: Colors.black54),
             ),
             const SizedBox(height: 30),
 
-            // Question Text
             Text(
               currentQuestion.questionText,
               style: const TextStyle(
@@ -190,7 +181,6 @@ class _QuizPageState extends State<QuizPage> {
             ),
             const SizedBox(height: 30),
 
-            // Options List
             Expanded(
               child: ListView.builder(
                 itemCount: currentQuestion.options.length,
@@ -204,7 +194,6 @@ class _QuizPageState extends State<QuizPage> {
               ),
             ),
 
-            // Action Button
             SizedBox(
               width: double.infinity,
               height: 50,

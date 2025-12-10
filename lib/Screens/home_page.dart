@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:door_to_programming/Services/firestoreService.dart';
 import 'package:door_to_programming/Models/app_models.dart';
 import 'package:door_to_programming/Lessons/lesson_data.dart';
-import 'package:door_to_programming/Widgets/skeleton.dart'; // Ensure you created this file
+import 'package:door_to_programming/Widgets/skeleton.dart';
 import 'language_lesson_screen.dart';
 import 'profile_page.dart';
 import 'notifications_page.dart';
@@ -59,7 +59,7 @@ class _HomePageState extends State<HomePage> {
         : 'User';
     
     final String initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
-
+    
     return StreamBuilder<UserModel>(
       stream: _firestoreService.streamUserProfile(widget.user.uid),
       builder: (context, userSnapshot) {
@@ -70,7 +70,6 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.grey[50],
           extendBody: true,
           
-          // --- TOP BAR ---
           appBar: AppBar(
             automaticallyImplyLeading: false, 
             backgroundColor: Colors.white,
@@ -85,7 +84,6 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // UPDATED: Text is now blue
                     const Text('Тавтай морил,', style: TextStyle(color: Colors.blue, fontSize: 12)),
                     Text(displayName, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
                   ],
@@ -99,7 +97,7 @@ class _HomePageState extends State<HomePage> {
             onPageChanged: (index) => setState(() => _selectedIndex = index),
             children: [
               const ProfilePage(),             
-              _buildHomeBody(userModel), // Uses CustomScrollView now
+              _buildHomeBody(userModel),
               const NotificationsPage(),       
             ],
           ),
@@ -109,7 +107,6 @@ class _HomePageState extends State<HomePage> {
               height: 70,
               margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
               decoration: BoxDecoration(
-                // UPDATED: Nav bar is Blue
                 color: Colors.blue, 
                 borderRadius: BorderRadius.circular(35),
                 boxShadow: [
@@ -143,11 +140,9 @@ class _HomePageState extends State<HomePage> {
             : null,
         child: Row(
           children: [
-            // UPDATED: Icons are black
             Icon(isSelected ? iconFilled : iconOutlined, color: Colors.black, size: 26),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              // UPDATED: Text is black
               Text(label, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14)),
             ]
           ],
@@ -156,17 +151,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // --- REFACTORED BODY: Uses CustomScrollView (Slivers) ---
   Widget _buildHomeBody(UserModel userModel) {
     return StreamBuilder<List<ProgrammingLanguage>>(
       stream: _firestoreService.streamLanguages(),
       builder: (context, snapshot) {
-        // Prepare Data
         List<ProgrammingLanguage> filteredList = [];
         bool isLoading = snapshot.connectionState == ConnectionState.waiting;
         if (snapshot.hasError) {
               print("Firestore Error: ${snapshot.error}");
-              // CORRECT: Use a standard Widget
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -185,7 +177,6 @@ class _HomePageState extends State<HomePage> {
 
         return CustomScrollView(
           slivers: [
-            // 1. Header & Search Bar (Non-scrollable content turned into a Sliver)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -194,7 +185,6 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Row(
                       children: [
-                        // Filter Button
                         Container(
                           decoration: BoxDecoration(
                             color: _showFavoritesOnly ? Colors.red.shade50 : Colors.white,
@@ -213,12 +203,10 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(width: 15),
-                        // Search Bar
                         Expanded(
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
                             decoration: BoxDecoration(
-                              // UPDATED: Search bar is light blue
                               color: Colors.lightBlue.shade50, 
                               borderRadius: BorderRadius.circular(15),
                               boxShadow: [
@@ -248,7 +236,6 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            // 2. The Grid (SliverGrid)
             if (isLoading)
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -283,7 +270,6 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-            // 3. Bottom Padding for Navigation Bar
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
         );
@@ -295,7 +281,6 @@ class _HomePageState extends State<HomePage> {
 
     return Card(
       elevation: 2,
-      // UPDATED: Card background matches language color
       color: lang.color.withOpacity(0.2), 
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -350,10 +335,8 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.white.withOpacity(0.6),
                       shape: BoxShape.circle,
                     ),
-                    // Use errorBuilder to prevent crashes if image path is wrong
                     child: Image.asset(
                       lang.imagePath, 
-                      // UPDATED: Images are a tiny bit bigger
                       height: 40, 
                       width: 40,
                       errorBuilder: (context, error, stackTrace) => const Icon(Icons.code),

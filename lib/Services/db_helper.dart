@@ -7,7 +7,6 @@ class DBHelper {
   static const _secureStorage = FlutterSecureStorage();
   static const String DB_NAME = 'users.db';
   static const String USER_TABLE = 'users';
-  // New table names
   static const String PROGRESS_TABLE = 'lesson_progress';
   static const String SCORES_TABLE = 'quiz_scores';
 
@@ -20,17 +19,13 @@ class DBHelper {
 
   static Future<Database> initDb() async {
     final path = join(await getDatabasesPath(), DB_NAME);
-    // Note: We need to increment the version number to trigger onCreate/onUpgrade
-    // Since this is the first time adding new tables, we change version to 2
     return await openDatabase(path, version: 2, onCreate: (db, version) async {
-      // 1. User table (Existing)
       await db.execute('''
         CREATE TABLE $USER_TABLE (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           email TEXT UNIQUE
         )
       ''');
-      // 2. Lesson Progress Table (New)
       await db.execute('''
         CREATE TABLE $PROGRESS_TABLE (
           user_id INTEGER,
@@ -40,7 +35,6 @@ class DBHelper {
           FOREIGN KEY (user_id) REFERENCES $USER_TABLE(id)
         )
       ''');
-      // 3. Quiz Scores Table (New)
       await db.execute('''
         CREATE TABLE $SCORES_TABLE (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,9 +47,7 @@ class DBHelper {
         )
       ''');
     }, onUpgrade: (db, oldVersion, newVersion) async {
-      // Handle upgrades if users already have V1 of the database
       if (oldVersion < 2) {
-        // Create Lesson Progress Table
         await db.execute('''
           CREATE TABLE $PROGRESS_TABLE (
             user_id INTEGER,
@@ -65,7 +57,6 @@ class DBHelper {
             FOREIGN KEY (user_id) REFERENCES $USER_TABLE(id)
           )
         ''');
-        // Create Quiz Scores Table
         await db.execute('''
           CREATE TABLE $SCORES_TABLE (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,7 +75,7 @@ class DBHelper {
   static Future<int> registerUser(String email, String password) async {
     final dbClient = await db;
     final result = await dbClient.query(USER_TABLE, where: 'email = ?', whereArgs: [email]);
-    if (result.isNotEmpty) return -1; // user already exists
+    if (result.isNotEmpty) return -1;
 
     final id = await dbClient.insert(USER_TABLE, {'email': email});
     if (id != -1) {
@@ -114,16 +105,11 @@ class DBHelper {
     final dbClient = await db;
     final result = await dbClient.query(USER_TABLE, where: 'email = ?', whereArgs: [email]);
     if (result.isNotEmpty) {
-      // Update password in Secure Storage
       await _secureStorage.write(key: email, value: newPassword);
-      // Return 1 for success
       return 1;
     }
-    // Return 0 if user not found
     return 0;
   }
-  
-  // --- NEW: Lesson Progress Methods ---
 
   static Future<bool> isLessonCompleted(int userId, int lessonId) async {
     final dbClient = await db;
@@ -132,7 +118,6 @@ class DBHelper {
       where: 'user_id = ? AND lesson_id = ?',
       whereArgs: [userId, lessonId],
     );
-    // Check if the lesson is marked as completed (is_completed = 1)
     return result.isNotEmpty && (result.first['is_completed'] == 1);
   }
 
@@ -141,7 +126,7 @@ class DBHelper {
     await dbClient.insert(
       PROGRESS_TABLE,
       {'user_id': userId, 'lesson_id': lessonId, 'is_completed': 1},
-      conflictAlgorithm: ConflictAlgorithm.replace, // Upsert: update if exists
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
   
@@ -154,8 +139,6 @@ class DBHelper {
     
     return Sqflite.firstIntValue(result) ?? 0;
   }
-
-  // --- NEW: Quiz Scores Methods ---
 
   static Future<void> saveQuizScore(int userId, int lessonId, int score, int totalQuestions) async {
     final dbClient = await db;

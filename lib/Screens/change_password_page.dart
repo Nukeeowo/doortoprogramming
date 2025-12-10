@@ -32,7 +32,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         }
       } on FirebaseAuthException catch (e) {
         if (mounted) {
-          // If the user hasn't logged in recently, Firebase requires re-authentication
           if (e.code == 'requires-recent-login') {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Нууц үгээ солихын тулд системээс гарч дахин нэвтэрнэ үү.')),

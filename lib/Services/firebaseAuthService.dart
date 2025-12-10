@@ -13,22 +13,21 @@ class FirebaseAuthService {
       );
       return userCredential.user;
     } catch (e) {
-      print("Register Error: $e"); // Print error to console for debugging
+      print("Register Error: $e"); 
       return null;
     }
   }
 
   Future<User?> loginUser(String email, String password) async {
-    print("--- ATTEMPTING LOGIN FOR: $email ---"); // 1. Check if this prints
+    print("--- ATTEMPTING LOGIN FOR: $email ---"); 
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print("--- LOGIN SUCCESSFUL ---"); // 2. Check if this prints
+      print("--- LOGIN SUCCESSFUL ---"); 
       return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      // 3. This is the important part!
       print("--- FIREBASE AUTH ERROR ---");
       print("Code: ${e.code}"); 
       print("Message: ${e.message}");

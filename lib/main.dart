@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'Registry/splash_screen.dart';
 import 'Services/firebase_options.dart';
 
-// Global Theme Notifier
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() async {
@@ -22,7 +21,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
         return MaterialApp(
-           // Listens to the switch
           home: const SplashScreen(),
         );
       }

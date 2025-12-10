@@ -27,7 +27,6 @@ class _CodePlaygroundPageState extends State<CodePlaygroundPage> {
     _codeController = TextEditingController(text: widget.initialCode);
   }
 
-  // Map display names to Piston API IDs
   String get _pistonLanguageId {
     switch (widget.language.toLowerCase()) {
       case 'java': return 'java';
@@ -37,7 +36,7 @@ class _CodePlaygroundPageState extends State<CodePlaygroundPage> {
       case 'php': return 'php';
       case 'ruby': return 'ruby';
       case 'go': return 'go';
-      case 'sql': return 'sqlite3'; // SQL is tricky, sqlite is closest for basic queries
+      case 'sql': return 'sqlite3';
       default: return 'python';
     }
   }
@@ -83,7 +82,7 @@ class _CodePlaygroundPageState extends State<CodePlaygroundPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E1E1E), // Dark Theme
+      backgroundColor: const Color(0xFF1E1E1E),
       appBar: AppBar(
         title: Text("${widget.language} Playground"),
         backgroundColor: const Color(0xFF2D2D2D),
@@ -99,7 +98,6 @@ class _CodePlaygroundPageState extends State<CodePlaygroundPage> {
       ),
       body: Column(
         children: [
-          // Code Editor Area
           Expanded(
             flex: 2,
             child: Container(
@@ -122,7 +120,6 @@ class _CodePlaygroundPageState extends State<CodePlaygroundPage> {
             ),
           ),
           const Divider(height: 1, color: Colors.white24),
-          // Output Area
           Expanded(
             flex: 1,
             child: Container(

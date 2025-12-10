@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:door_to_programming/Lessons/lesson_data.dart';
 import 'package:door_to_programming/Services/firestoreService.dart';
-import 'package:door_to_programming/Models/app_models.dart'; // Import UserModel
+import 'package:door_to_programming/Models/app_models.dart'; 
 import 'quiz_page.dart';
 import 'code_playground.dart';
 
@@ -10,14 +10,14 @@ class LanguageLessonScreen extends StatelessWidget {
   final User user;
   final Lesson lesson;
   final Color languageColor;
-  final String languageTitle; // <--- NEW: Need this to favorite the course
+  final String languageTitle;
 
   LanguageLessonScreen({
     super.key,
     required this.user,
     required this.lesson,
     required this.languageColor,
-    required this.languageTitle, // <--- Add to constructor
+    required this.languageTitle,
   });
 
   final FirestoreService _firestoreService = FirestoreService();
@@ -27,7 +27,6 @@ class LanguageLessonScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       
-      // --- AppBar ---
       appBar: AppBar(
         backgroundColor: languageColor,
         elevation: 0,
@@ -40,7 +39,6 @@ class LanguageLessonScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        // --- NEW: Favorite Button in Top Right ---
         actions: [
           IconButton(
               icon: const Icon(Icons.code, color: Colors.white),
@@ -51,7 +49,6 @@ class LanguageLessonScreen extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => CodePlaygroundPage(
                       language: languageTitle,
-                      // Try to find a code snippet from the lesson to pre-fill
                       initialCode: lesson.sections
                           .firstWhere((s) => s.codeSnippet != null, 
                               orElse: () => const LessonSection(heading: '', content: '', codeSnippet: ''))
@@ -65,19 +62,17 @@ class LanguageLessonScreen extends StatelessWidget {
             
             stream: _firestoreService.streamUserProfile(user.uid),
             builder: (context, snapshot) {
-              // Default to not favorited while loading
               final favorites = snapshot.data?.favorites ?? [];
               final isFavorited = favorites.contains(languageTitle);
 
               return IconButton(
                 icon: Icon(
                   isFavorited ? Icons.favorite : Icons.favorite_border,
-                  color: Colors.white, // White to match AppBar theme
+                  color: Colors.white,
                 ),
                 onPressed: () {
                   _firestoreService.toggleFavorite(user.uid, languageTitle);
                   
-                  // Optional: Show a small snackbar feedback
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(isFavorited 
@@ -93,7 +88,6 @@ class LanguageLessonScreen extends StatelessWidget {
         ],
       ),
       
-      // --- Body ---
       body: Column(
         children: [
           Expanded(
@@ -102,7 +96,6 @@ class LanguageLessonScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 1. Completion Status Badge
                   StreamBuilder<bool>(
                     stream: _firestoreService.isLessonCompleted(user.uid, lesson.id.toString()),
                     builder: (context, snapshot) {
@@ -136,7 +129,6 @@ class LanguageLessonScreen extends StatelessWidget {
                     },
                   ),
 
-                  // 2. Lesson Sections
                   ...lesson.sections.map((section) => _buildSection(section)),
                    
                   const SizedBox(height: 80), 
@@ -147,7 +139,6 @@ class LanguageLessonScreen extends StatelessWidget {
         ],
       ),
 
-      // --- Fixed Bottom "Start Quiz" Button ---
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -210,24 +201,21 @@ class LanguageLessonScreen extends StatelessWidget {
   }
 
   Widget _buildSection(LessonSection section) {
-    // 1. If it's a "Highlighted" section, render the special Split/Lifted style
     if (section.isHighlighted) {
       return Container(
         margin: const EdgeInsets.only(bottom: 30),
-        // The "Split" Background
         decoration: BoxDecoration(
-          color: languageColor.withOpacity(0.15), // Light version of language color
+          color: languageColor.withOpacity(0.15),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: languageColor.withOpacity(0.3)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Colored Header Area
             Container(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
               decoration: BoxDecoration(
-                color: languageColor, // Solid color top
+                color: languageColor,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
               ),
               child: section.heading.isNotEmpty
@@ -236,13 +224,12 @@ class LanguageLessonScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // White text on colored background
+                        color: Colors.white,
                       ),
                     )
                   : const SizedBox.shrink(),
             ),
             
-            // The "Lifted" Content
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -270,7 +257,6 @@ class LanguageLessonScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Render code snippet inside if it exists
                   if (section.codeSnippet != null && section.codeSnippet!.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     _buildCodeSnippet(section.codeSnippet!),
@@ -283,7 +269,6 @@ class LanguageLessonScreen extends StatelessWidget {
       );
     }
 
-    // 2. Otherwise, render the STANDARD style (Your original look)
     return Padding(
       padding: const EdgeInsets.only(bottom: 30.0),
       child: Column(
@@ -318,7 +303,6 @@ class LanguageLessonScreen extends StatelessWidget {
     );
   }
 
-  // Helper to keep code clean (Moved your original code snippet logic here)
   Widget _buildCodeSnippet(String code) {
     return Container(
       width: double.infinity,
