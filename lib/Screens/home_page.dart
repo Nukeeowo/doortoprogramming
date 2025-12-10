@@ -164,7 +164,16 @@ class _HomePageState extends State<HomePage> {
         // Prepare Data
         List<ProgrammingLanguage> filteredList = [];
         bool isLoading = snapshot.connectionState == ConnectionState.waiting;
-
+        if (snapshot.hasError) {
+              print("Firestore Error: ${snapshot.error}");
+              // CORRECT: Use a standard Widget
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("Error loading data: ${snapshot.error}", textAlign: TextAlign.center),
+                ),
+              );
+            }
         if (!isLoading) {
           final allLanguages = snapshot.data ?? [];
           filteredList = allLanguages.where((lang) {

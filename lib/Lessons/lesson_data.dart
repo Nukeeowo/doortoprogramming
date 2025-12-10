@@ -35,11 +35,13 @@ class LessonSection {
   final String heading;
   final String content;
   final String? codeSnippet;
+  final bool isHighlighted; // <--- NEW: Add this flag
 
   const LessonSection({
     required this.heading,
     required this.content,
     this.codeSnippet,
+    this.isHighlighted = false, // <--- Default to false (standard look)
   });
 }
 

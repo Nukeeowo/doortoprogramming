@@ -210,6 +210,80 @@ class LanguageLessonScreen extends StatelessWidget {
   }
 
   Widget _buildSection(LessonSection section) {
+    // 1. If it's a "Highlighted" section, render the special Split/Lifted style
+    if (section.isHighlighted) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 30),
+        // The "Split" Background
+        decoration: BoxDecoration(
+          color: languageColor.withOpacity(0.15), // Light version of language color
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: languageColor.withOpacity(0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Colored Header Area
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+              decoration: BoxDecoration(
+                color: languageColor, // Solid color top
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+              ),
+              child: section.heading.isNotEmpty
+                  ? Text(
+                      section.heading,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white, // White text on colored background
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            
+            // The "Lifted" Content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: languageColor.withOpacity(0.2),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      section.content,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        height: 1.6,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  // Render code snippet inside if it exists
+                  if (section.codeSnippet != null && section.codeSnippet!.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    _buildCodeSnippet(section.codeSnippet!),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 2. Otherwise, render the STANDARD style (Your original look)
     return Padding(
       padding: const EdgeInsets.only(bottom: 30.0),
       child: Column(
@@ -231,53 +305,57 @@ class LanguageLessonScreen extends StatelessWidget {
             section.content,
             style: TextStyle(
               fontSize: 16,
-              height: 1.6, 
+              height: 1.6,
               color: Colors.grey[800],
             ),
           ),
           if (section.codeSnippet != null && section.codeSnippet!.isNotEmpty) ...[
             const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E), 
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                boxShadow: [
-                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                   )
-                ]
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _windowDot(const Color(0xFFFF5F56)),
-                      const SizedBox(width: 6),
-                      _windowDot(const Color(0xFFFFBD2E)),
-                      const SizedBox(width: 6),
-                      _windowDot(const Color(0xFF27C93F)),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  SelectableText(
-                    section.codeSnippet!,
-                    style: const TextStyle(
-                      fontFamily: 'Courier New',
-                      color: Color(0xFFD4D4D4),
-                      fontSize: 14,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildCodeSnippet(section.codeSnippet!),
           ],
+        ],
+      ),
+    );
+  }
+
+  // Helper to keep code clean (Moved your original code snippet logic here)
+  Widget _buildCodeSnippet(String code) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            )
+          ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _windowDot(const Color(0xFFFF5F56)),
+              const SizedBox(width: 6),
+              _windowDot(const Color(0xFFFFBD2E)),
+              const SizedBox(width: 6),
+              _windowDot(const Color(0xFF27C93F)),
+            ],
+          ),
+          const SizedBox(height: 15),
+          SelectableText(
+            code,
+            style: const TextStyle(
+              fontFamily: 'Courier New',
+              color: Color(0xFFD4D4D4),
+              fontSize: 14,
+              height: 1.4,
+            ),
+          ),
         ],
       ),
     );
