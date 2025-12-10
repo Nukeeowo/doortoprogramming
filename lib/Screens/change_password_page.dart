@@ -25,7 +25,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Password updated successfully!')),
+              const SnackBar(content: Text('Нууц үг амжилттай солигдлоо')),
             );
             Navigator.pop(context);
           }
@@ -35,7 +35,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           // If the user hasn't logged in recently, Firebase requires re-authentication
           if (e.code == 'requires-recent-login') {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Please log out and log in again to change your password.')),
+              const SnackBar(content: Text('Нууц үгээ солихын тулд системээс гарч дахин нэвтэрнэ үү.')),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -46,7 +46,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('An error occurred.')),
+            const SnackBar(content: Text('Алдаа гарлаа.')),
           );
         }
       } finally {
@@ -58,7 +58,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Change Password")),
+      appBar: AppBar(title: const Text("Нууц үг солих")),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(
@@ -69,23 +69,23 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 controller: _newPasswordController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: "New Password",
+                  labelText: "Шинэ нууц үг",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock),
                 ),
-                validator: (val) => val != null && val.length < 6 ? "Password must be 6+ chars" : null,
+                validator: (val) => val != null && val.length < 6 ? "Нууц үг 6 тэмдэгтээс их байх ёстой." : null,
               ),
               const SizedBox(height: 20),
               TextFormField(
                 controller: _confirmPasswordController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: "Confirm Password",
+                  labelText: "Дахин давтах",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock_outline),
                 ),
                 validator: (val) {
-                  if (val != _newPasswordController.text) return "Passwords do not match";
+                  if (val != _newPasswordController.text) return "Нууц үг таарахгүй байна.";
                   return null;
                 },
               ),
@@ -101,7 +101,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   ),
                   child: _isLoading 
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Update Password"),
+                      : const Text("Нууц үг шинэчлэх"),
                 ),
               ),
             ],

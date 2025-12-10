@@ -25,14 +25,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         _passwordController.text.isEmpty ||
         _confirmController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
+        const SnackBar(content: Text('Бүх талбарыг дүүргэнэ үү.')),
       );
       return;
     }
 
     if (_passwordController.text != _confirmController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match.')),
+        const SnackBar(content: Text('Нууц үгүүд таарахгүй байна.')),
       );
       return;
     }
@@ -44,7 +44,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
     if (isSuccess) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset link sent to your email!')),
+        const SnackBar(content: Text('Нууц үг солих линк амжилттай илгээгдлээ.')),
       );
       // 2. Navigate back to the login page
       Navigator.pushReplacement(
@@ -53,7 +53,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to send reset email. User not found.')),
+        const SnackBar(content: Text('Хэрэглэгч олдсонгүй. Цахим шуудангаа дахин шалгана уу.')),
       );
     }
   }
@@ -87,7 +87,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 controller: _emailController,
                 style: const TextStyle(color: blue),
                 decoration: InputDecoration(
-                  hintText: 'Email', // Placeholder text
+                  hintText: 'Цахим шуудан', // Placeholder text
                   hintStyle: TextStyle(color: blue.withOpacity(0.6)),
                   filled: true,
                   fillColor: lightBlue,

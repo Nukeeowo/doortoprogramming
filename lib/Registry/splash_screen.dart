@@ -232,14 +232,14 @@ class _SplashScreenState extends State<SplashScreen>
                         // 1. Login Button (Нэвтрэх)
                         _buildPrimaryButton(
                           onPressed: () => _navigateTo(const LoginPage()),
-                          label: 'НэвтРЭХ',
+                          label: 'Нэвтрэх',
                         ),
                         const SizedBox(height: 15),
 
                         // 2. Register Button (Бүртгүүлэх)
                         _buildSecondaryButton(
                           onPressed: () => _navigateTo(const RegisterPage()),
-                          label: 'БҮРТГҮҮЛЭХ',
+                          label: 'Бүртгүүлэх',
                         ),
                         const SizedBox(height: 30),
 

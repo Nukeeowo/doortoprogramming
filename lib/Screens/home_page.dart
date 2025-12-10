@@ -78,14 +78,15 @@ class _HomePageState extends State<HomePage> {
             title: Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.deepPurple.shade50,
-                  child: Text(initial, style: const TextStyle(color: Colors.deepPurple)),
+                  backgroundColor: Colors.blue.shade50,
+                  child: Text(initial, style: const TextStyle(color: Colors.blue)),
                 ),
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Welcome back,', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                    // UPDATED: Text is now blue
+                    const Text('Тавтай морил,', style: TextStyle(color: Colors.blue, fontSize: 12)),
                     Text(displayName, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
                   ],
                 ),
@@ -108,7 +109,8 @@ class _HomePageState extends State<HomePage> {
               height: 70,
               margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                // UPDATED: Nav bar is Blue
+                color: Colors.blue, 
                 borderRadius: BorderRadius.circular(35),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
@@ -117,9 +119,9 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildCustomNavItem(0, Icons.person_outline, Icons.person, "Profile"),
-                  _buildCustomNavItem(1, Icons.home_outlined, Icons.home, "Home"),
-                  _buildCustomNavItem(2, Icons.notifications_outlined, Icons.notifications, "Notifs"),
+                  _buildCustomNavItem(0, Icons.person_outline, Icons.person, "Хэрэглэгч"),
+                  _buildCustomNavItem(1, Icons.home_outlined, Icons.home, "Нүүр"),
+                  _buildCustomNavItem(2, Icons.notifications_outlined, Icons.notifications, "Мэдэгдэл"),
                 ],
               ),
             ),
@@ -137,14 +139,16 @@ class _HomePageState extends State<HomePage> {
         duration: const Duration(milliseconds: 300),
         padding: EdgeInsets.symmetric(horizontal: isSelected ? 20 : 10, vertical: 10),
         decoration: isSelected 
-            ? BoxDecoration(color: Colors.deepPurple.shade50, borderRadius: BorderRadius.circular(25))
+            ? BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(25))
             : null,
         child: Row(
           children: [
-            Icon(isSelected ? iconFilled : iconOutlined, color: isSelected ? Colors.deepPurple : Colors.grey, size: 26),
+            // UPDATED: Icons are black
+            Icon(isSelected ? iconFilled : iconOutlined, color: Colors.black, size: 26),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              Text(label, style: const TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold, fontSize: 14)),
+              // UPDATED: Text is black
+              Text(label, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 14)),
             ]
           ],
         ),
@@ -205,7 +209,8 @@ class _HomePageState extends State<HomePage> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 15),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              // UPDATED: Search bar is light blue
+                              color: Colors.lightBlue.shade50, 
                               borderRadius: BorderRadius.circular(15),
                               boxShadow: [
                                 BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
@@ -214,7 +219,7 @@ class _HomePageState extends State<HomePage> {
                             child: TextField(
                               controller: _searchController,
                               decoration: const InputDecoration(
-                                hintText: 'Search languages...',
+                                hintText: 'Хайлт хийх...',
                                 border: InputBorder.none,
                                 icon: Icon(Icons.search, color: Colors.grey),
                               ),
@@ -225,7 +230,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     const SizedBox(height: 25),
                     Text(
-                      _showFavoritesOnly ? 'Your Favorites' : 'Learning Paths',
+                      _showFavoritesOnly ? 'Хадгалсан хичээлүүд' : 'Программын хэлнүүүд',
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 15),
@@ -252,7 +257,7 @@ class _HomePageState extends State<HomePage> {
               const SliverToBoxAdapter(
                 child: SizedBox(
                   height: 200,
-                  child: Center(child: Text("No languages found.")),
+                  child: Center(child: Text("Хичээл олдсонгүй.")),
                 ),
               )
             else
@@ -278,10 +283,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildLanguageCard(ProgrammingLanguage lang, UserModel userModel) {
-    final isFavorited = userModel.favorites.contains(lang.title);
 
     return Card(
       elevation: 2,
+      // UPDATED: Card background matches language color
+      color: lang.color.withOpacity(0.2), 
       shadowColor: Colors.black12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
@@ -293,7 +299,7 @@ class _HomePageState extends State<HomePage> {
               builder: (_) => LanguageLessonScreen(
                 user: widget.user,
                 lesson: lang.lessons.isNotEmpty ? lang.lessons.first : 
-                        const Lesson(id: 0, title: 'No Lesson', sections: [], quiz: Quiz(title: '', questions: [])),
+                        const Lesson(id: 0, title: 'Хичээл алга', sections: [], quiz: Quiz(title: '', questions: [])),
                 languageColor: lang.color,
                 languageTitle: lang.title,
               ),
@@ -316,14 +322,14 @@ class _HomePageState extends State<HomePage> {
                           lang.title,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 18, 
+                            fontSize: 16, 
                             color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${lang.lessons.length} lessons',
-                          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                          '${lang.lessons.length} хичээл',
+                          style: const TextStyle(color: Colors.black54, fontSize: 12),
                         ),
                       ],
                     ),
@@ -332,39 +338,20 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: lang.color.withOpacity(0.1),
+                      color: Colors.white.withOpacity(0.6),
                       shape: BoxShape.circle,
                     ),
                     // Use errorBuilder to prevent crashes if image path is wrong
                     child: Image.asset(
                       lang.imagePath, 
-                      height: 30, 
-                      width: 30,
+                      // UPDATED: Images are a tiny bit bigger
+                      height: 40, 
+                      width: 40,
                       errorBuilder: (context, error, stackTrace) => const Icon(Icons.code),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  InkWell(
-                    onTap: () {
-                      _firestoreService.toggleFavorite(widget.user.uid, lang.title);
-                    },
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: isFavorited ? Colors.red.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  )
-                ],
-              )
             ],
           ),
         ),

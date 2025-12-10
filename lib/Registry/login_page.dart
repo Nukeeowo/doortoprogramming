@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid email or password')),
+            const SnackBar(content: Text('Нууц үг эсвэл цахим шуудан буруу байна.')),
           );
         }
       }
@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _emailController,
                 style: const TextStyle(color: blue),
                 decoration: InputDecoration(
-                  hintText: 'И-мэйл хаяг',
+                  hintText: 'Цахим шуудан',
                   hintStyle: TextStyle(color: blue.withOpacity(0.6)),
                   filled: true,
                   fillColor: lightBlue,
@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterPage())),
                 child: RichText(
                   text: TextSpan(
-                    text: 'Хэрэв аккоунт байхгүй бол? ',
+                    text: 'Хэрэв хаяг байхгүй бол? ',
                     style: const TextStyle(color: Colors.black54, fontSize: 14),
                     children: [TextSpan(text: 'Бүртгүүлэх', style: TextStyle(color: blue, fontWeight: FontWeight.bold))],
                   ),

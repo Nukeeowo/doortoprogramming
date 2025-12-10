@@ -21,7 +21,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void _register() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
+        const SnackBar(content: Text('Бүх талбарыг дүүргэнэ үү.')),
       );
       return;
     }
@@ -38,7 +38,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful! Please log in.')));
+            const SnackBar(content: Text('Амжилттай бүртгэгдлээ. Нэвтэрч орно уу.')));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const LoginPage()),

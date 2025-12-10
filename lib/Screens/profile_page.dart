@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:door_to_programming/Services/firestoreService.dart';
 import 'package:door_to_programming/Lessons/lesson_data.dart';
-import 'change_password_page.dart'; // Import the new page
+import 'package:door_to_programming/Registry/login_page.dart'; // <--- IMPORT LOGIN PAGE
+import 'change_password_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -15,12 +16,23 @@ class _ProfilePageState extends State<ProfilePage> {
   final FirestoreService _firestoreService = FirestoreService();
   bool _isProgressExpanded = false;
 
+  // --- NEW: Logout Logic ---
+  void _logout() async {
+    await FirebaseAuth.instance.signOut();
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+        (route) => false, // Remove all previous routes so user can't go back
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final User? currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Center(child: Text("Please sign in to view your profile."));
+      return const Center(child: Text("Нэвтрэн хэрэглэгчийн мэдээллийг харна уу."));
     }
 
     String userName = currentUser.displayName ?? currentUser.email?.split('@').first ?? 'User';
@@ -28,7 +40,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final String userEmail = currentUser.email ?? 'No Email Provided';
 
     return Scaffold(
-      // Background color adapts to theme automatically now
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 100),
         child: Column(
@@ -38,35 +49,55 @@ class _ProfilePageState extends State<ProfilePage> {
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 40, 24, 40),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor, // Adapts to theme
+                color: Theme.of(context).cardColor,
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30)),
                 boxShadow: const [
                   BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5))
                 ],
               ),
-              child: Column(
+              // Use Stack to position the logout button
+              child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.deepPurple.shade50,
-                    child: Text(
-                      userName[0].toUpperCase(),
-                      style: TextStyle(fontSize: 40, color: Colors.deepPurple.shade700, fontWeight: FontWeight.bold),
+                  // 1. Centered User Info
+                  Align(
+                    alignment: Alignment.center,
+                    child: Column(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Colors.deepPurple.shade50,
+                          child: Text(
+                            userName[0].toUpperCase(),
+                            style: TextStyle(fontSize: 40, color: Colors.deepPurple.shade700, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          userName,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          userEmail,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    userName,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    userEmail,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
+
+                  // 2. Logout Button (Top Right)
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton(
+                      icon: Icon(Icons.logout, color: Colors.grey.shade700),
+                      tooltip: "Гарах",
+                      onPressed: _logout,
                     ),
                   ),
                 ],
@@ -90,15 +121,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Settings",
+                    "Тохиргоо",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 15),
                   
-                  // 1. Change Password
                   _buildSettingTile(
                     icon: Icons.lock_outline,
-                    title: "Change Password",
+                    title: "Нууц үг солих",
                     onTap: () {
                       Navigator.push(
                         context,
@@ -107,10 +137,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                   ),
 
-                  // 3. About App
-                   _buildSettingTile(
+                  _buildSettingTile(
                     icon: Icons.info_outline,
-                    title: "About App",
+                    title: "Бидний тухай",
                     onTap: () {
                       showAboutDialog(
                         context: context,
@@ -125,9 +154,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: const Icon(Icons.code, color: Colors.white),
                         ),
                         children: [
-                          const Text("This app helps you learn programming languages like Java, Python, and more with interactive lessons and quizzes."),
+                          const Text("Энэ апп нь Java, Python зэрэг программчлалын хэлүүдийг интерактив хичээлүүд болон сорилуудаар сурч эзэмшихэд тань тусалдаг."),
                           const SizedBox(height: 10),
-                          const Text("© 2024 Door to Programming Inc."),
+                          const Text("© 2025 Мобайл технологи бие даалт."),
                         ],
                       );
                     },
@@ -141,7 +170,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Helper Widgets
+  // --- Helper Widgets ---
   Widget _buildInteractiveProgressCard(String uid) {
     final totalLessons = allLanguagesWithLessons.fold<int>(0, (sum, lang) => sum + lang.lessons.length);
     
@@ -218,19 +247,19 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             _buildStatColumn(
                               count: completedCount.toString(),
-                              label: "Completed",
+                              label: "Дууссан",
                               icon: Icons.check_circle_outline,
                             ),
                             Container(width: 1, height: 40, color: Colors.white24),
                             _buildStatColumn(
                               count: "$percentageString%",
-                              label: "Progress",
+                              label: "Явц",
                               icon: Icons.trending_up,
                             ),
                             Container(width: 1, height: 40, color: Colors.white24),
                              _buildStatColumn(
                               count: totalLessons.toString(),
-                              label: "Total Goals",
+                              label: "Нийт",
                               icon: Icons.flag_outlined,
                             ),
                           ],
@@ -271,7 +300,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildSettingTile({required IconData icon, required String title, required VoidCallback onTap}) {
     return Card(
       elevation: 0,
-      color: Theme.of(context).cardColor, // Adapts to theme
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         leading: Container(
